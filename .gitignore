@@ -1,0 +1,19 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.venv/
+venv/
+
+# Application Data
+*.json
+!firebase.json
+
+# Firebase
+.firebase/
+.firebaserc
+
+# OS Specific
+.DS_Store
+Thumbs.db
