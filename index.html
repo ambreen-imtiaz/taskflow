@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TaskFlow</title>
+  <style>
+    :root {
+      --bg-color: #ffffff;
+      --panel-bg: #f8f9fa;
+      --border-color: #e9ecef;
+      --text-main: #212529;
+      --text-muted: #6c757d;
+      --primary: #4f46e5;
+      --primary-hover: #4338ca;
+      --card-bg: #ffffff;
+      --shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body { background-color: var(--bg-color); color: var(--text-main); display: flex; min-height: 100vh; }
+    
+    aside { width: 240px; background: var(--panel-bg); border-right: 1px solid var(--border-color); padding: 24px 16px; display: flex; flex-direction: column; justify-content: space-between; }
+    .brand { font-size: 1.25rem; font-weight: 700; color: var(--primary); margin-bottom: 32px; }
+    .nav-list { display: flex; flex-direction: column; gap: 4px; }
+    .nav-item { padding: 10px 12px; border-radius: 6px; cursor: pointer; color: var(--text-muted); font-weight: 500; display: flex; align-items: center; gap: 10px; transition: all 0.2s; }
+    .nav-item:hover, .nav-item.active { background: #eef2ff; color: var(--primary); }
+    
+    main { flex: 1; padding: 32px; max-width: 1200px; }
+    header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 32px; }
+    h1 { font-size: 1.75rem; font-weight: 700; margin-bottom: 4px; }
+    .subtitle { color: var(--text-muted); font-size: 0.95rem; }
+    
+    .btn-primary { background: var(--primary); color: white; border: none; padding: 10px 18px; border-radius: 6px; font-weight: 600; cursor: pointer; }
+    .btn-primary:hover { background: var(--primary-hover); }
+    
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin-bottom: 32px; }
+    .stat-card { background: var(--card-bg); border: 1px solid var(--border-color); padding: 20px; border-radius: 8px; box-shadow: var(--shadow); }
+    .stat-title { color: var(--text-muted); font-size: 0.85rem; font-weight: 500; margin-bottom: 8px; }
+    .stat-value { font-size: 1.75rem; font-weight: 700; }
+    
+    .view-section { display: none; }
+    .view-section.active { display: block; }
+    .task-list { list-style: none; display: flex; flex-direction: column; gap: 8px; margin-top: 16px; }
+    .task-item { background: var(--card-bg); border: 1px solid var(--border-color); padding: 12px 16px; border-radius: 6px; display: flex; justify-content: space-between; align-items: center; box-shadow: var(--shadow); }
+  </style>
+</head>
+<body>
+
+  <aside>
+    <div>
+      <div class="brand">⚡ TaskFlow</div>
+      <div class="nav-list">
+        <div class="nav-item active" onclick="switchTab('dashboard', this)">📊 Dashboard</div>
+        <div class="nav-item" onclick="switchTab('tasks', this)">✅ Tasks</div>
+        <div class="nav-item" onclick="switchTab('kanban', this)">📋 Kanban</div>
+        <div class="nav-item" onclick="switchTab('calendar', this)">📅 Calendar</div>
+        <div class="nav-item" onclick="switchTab('analytics', this)">📈 Analytics</div>
+        <div class="nav-item" onclick="switchTab('settings', this)">⚙️ Settings</div>
+      </div>
+    </div>
+  </aside>
+
+  <main>
+    <header>
+      <div>
+        <h1>Good Day 👋</h1>
+        <p class="subtitle">Here's your productivity overview for today.</p>
+      </div>
+      <button class="btn-primary" onclick="openTaskModal()">+ Add New Task</button>
+    </header>
+
+    <section id="view-dashboard" class="view-section active">
+      <div class="stats-grid">
+        <div class="stat-card"><div class="stat-title">Total Tasks</div><div class="stat-value" id="stat-total">0</div></div>
+        <div class="stat-card"><div class="stat-title">Completed</div><div class="stat-value" style="color: #10b981;" id="stat-completed">0</div></div>
+        <div class="stat-card"><div class="stat-title">In Progress</div><div class="stat-value" style="color: #3b82f6;" id="stat-progress">0</div></div>
+        <div class="stat-card"><div class="stat-title">Completion Rate</div><div class="stat-value" id="stat-rate">0%</div></div>
+      </div>
+      <h2>🎯 Today's Focus</h2>
+      <ul class="task-list" id="dashboard-task-list"></ul>
+    </section>
+
+    <section id="view-tasks" class="view-section">
+      <h2>All Tasks</h2>
+      <ul class="task-list" id="all-task-list"></ul>
+    </section>
+    
+    <section id="view-kanban" class="view-section"><h2>Kanban Board</h2><p class="subtitle">Kanban view coming soon.</p></section>
+    <section id="view-calendar" class="view-section"><h2>Calendar</h2><p class="subtitle">Calendar view coming soon.</p></section>
+    <section id="view-analytics" class="view-section"><h2>Analytics</h2><p class="subtitle">Analytics coming soon.</p></section>
+    <section id="view-settings" class="view-section">
+      <h2>Settings</h2>
+      <br>
+      <button class="btn-primary" onclick="exportData()">Export JSON Data</button>
+      <button class="btn-primary" style="background: #ef4444;" onclick="clearData()">Clear All Data</button>
+    </section>
+  </main>
+
+  <script>
+    let tasks = JSON.parse(localStorage.getItem('taskflow_tasks')) || [];
+
+    function saveState() {
+      localStorage.setItem('taskflow_tasks', JSON.stringify(tasks));
+      renderAll();
+    }
+
+    function openTaskModal() {
+      const title = prompt("Enter task title:");
+      if (!title) return;
+
+      tasks.push({
+        id: Date.now(),
+        title: title,
+        completed: false
+      });
+      saveState();
+    }
+
+    function toggleTask(id) {
+      tasks = tasks.map(t => t.id === id ? { ...t, completed: !t.completed } : t);
+      saveState();
+    }
+
+    function switchTab(tabName, element) {
+      document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+      if (element) element.classList.add('active');
+
+      document.querySelectorAll('.view-section').forEach(sec => sec.classList.remove('active'));
+      const target = document.getElementById(`view-${tabName}`);
+      if (target) target.classList.add('active');
+    }
+
+    function renderAll() {
+      const total = tasks.length;
+      const completed = tasks.filter(t => t.completed).length;
+      const progress = total - completed;
+      const rate = total === 0 ? 0 : Math.round((completed / total) * 100);
+
+      document.getElementById('stat-total').textContent = total;
+      document.getElementById('stat-completed').textContent = completed;
+      document.getElementById('stat-progress').textContent = progress;
+      document.getElementById('stat-rate').textContent = `${rate}%`;
+
+      const listHtml = tasks.map(t => `
+        <li class="task-item">
+          <span style="${t.completed ? 'text-decoration: line-through; color: var(--text-muted);' : ''}">${t.title}</span>
+          <button class="btn-primary" style="background: ${t.completed ? '#6c757d' : '#10b981'}; font-size: 0.8rem; padding: 4px 8px;" onclick="toggleTask(${t.id})">
+            ${t.completed ? 'Undo' : 'Complete'}
+          </button>
+        </li>
+      `).join('');
+
+      document.getElementById('dashboard-task-list').innerHTML = listHtml || '<p class="subtitle" style="margin-top: 12px;">No tasks yet. Click + Add New Task above!</p>';
+      document.getElementById('all-task-list').innerHTML = listHtml || '<p class="subtitle" style="margin-top: 12px;">No tasks created.</p>';
+    }
+
+    function exportData() {
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(tasks, null, 2));
+      const downloadAnchor = document.createElement('a');
+      downloadAnchor.setAttribute("href", dataStr);
+      downloadAnchor.setAttribute("download", "taskflow_export.json");
+      document.body.appendChild(downloadAnchor);
+      downloadAnchor.click();
+      downloadAnchor.remove();
+    }
+
+    function clearData() {
+      if (confirm('Warning: This will clear all stored task data.')) {
+        tasks = [];
+        saveState();
+      }
+    }
+
+    renderAll();
+  </script>
+</body>
+</html>

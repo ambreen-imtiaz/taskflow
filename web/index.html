@@ -1,48 +1,452 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TaskFlow — Task Manager</title>
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TaskFlow Pro — Custom Themes Edition</title>
+  <style>
+    :root {
+      --bg-color: #0f172a;
+      --panel-bg: #1e293b;
+      --border-color: #334155;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --primary: #6366f1;
+      --primary-hover: #4f46e5;
+      --card-bg: #1e293b;
+      --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+      --accent-high: #ef4444;
+      --accent-medium: #f59e0b;
+      --accent-low: #10b981;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; transition: background 0.2s, color 0.2s, border-color 0.2s; }
+    body { background-color: var(--bg-color); color: var(--text-main); display: flex; min-height: 100vh; }
+    
+    aside { width: 260px; background: #0b0f19; border-right: 1px solid var(--border-color); padding: 28px 18px; display: flex; flex-direction: column; justify-content: space-between; }
+    .brand { font-size: 1.4rem; font-weight: 800; background: linear-gradient(135deg, var(--primary), #c084fc, #f43f5e); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 32px; }
+    .nav-list { display: flex; flex-direction: column; gap: 6px; }
+    .nav-item { padding: 12px 14px; border-radius: 10px; cursor: pointer; color: var(--text-muted); font-weight: 600; font-size: 0.9rem; display: flex; align-items: center; gap: 12px; }
+    .nav-item:hover, .nav-item.active { background: rgba(99, 102, 241, 0.2); color: var(--primary); border-left: 3px solid var(--primary); }
+    
+    main { flex: 1; padding: 32px; max-width: 1300px; }
+    header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 28px; gap: 16px; flex-wrap: wrap; }
+    h1 { font-size: 1.85rem; font-weight: 800; letter-spacing: -0.5px; }
+    .subtitle { color: var(--text-muted); font-size: 0.9rem; }
+    
+    .search-bar { background: #0b0f19; border: 1px solid var(--border-color); padding: 10px 16px; border-radius: 8px; color: var(--text-main); width: 260px; outline: none; }
+    .btn-primary { background: var(--primary); color: white; border: none; padding: 11px 22px; border-radius: 8px; font-weight: 700; cursor: pointer; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2); }
+    .btn-primary:hover { opacity: 0.9; }
+
+    .dashboard-grid { display: grid; grid-template-columns: repeat(12, 1fr); gap: 20px; }
+    
+    .clock-widget { grid-column: span 12; background: linear-gradient(135deg, #1e1b4b, var(--panel-bg)); border-radius: 16px; padding: 24px; color: white; display: flex; justify-content: space-between; align-items: center; box-shadow: var(--shadow); border: 1px solid var(--border-color); }
+    .live-clock { font-size: 2.2rem; font-weight: 900; letter-spacing: 1px; color: var(--accent-low); }
+    .reminder-badge { background: rgba(255,255,255,0.1); padding: 8px 16px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; }
+
+    .stat-card { grid-column: span 3; background: var(--card-bg); border-radius: 14px; padding: 20px; border: 1px solid var(--border-color); box-shadow: var(--shadow); }
+    .stat-card-title { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); font-weight: 700; margin-bottom: 6px; }
+    .stat-card-value { font-size: 2.1rem; font-weight: 800; }
+    
+    .widget-box { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 14px; padding: 22px; box-shadow: var(--shadow); }
+    .widget-title { font-size: 1.05rem; font-weight: 700; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; }
+
+    .view-section { display: none; }
+    .view-section.active { display: block; }
+    .task-list { list-style: none; display: flex; flex-direction: column; gap: 10px; margin-top: 10px; }
+    
+    .task-item { background: #0b0f19; border: 1px solid var(--border-color); padding: 14px 16px; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; }
+    .task-title { font-weight: 600; font-size: 0.95rem; }
+    .badge { padding: 3px 8px; border-radius: 12px; font-weight: 700; text-transform: uppercase; font-size: 0.65rem; }
+    .badge-high { background: rgba(239, 68, 68, 0.2); color: var(--accent-high); border: 1px solid var(--accent-high); }
+    .badge-medium { background: rgba(245, 158, 11, 0.2); color: var(--accent-medium); border: 1px solid var(--accent-medium); }
+    .badge-low { background: rgba(16, 185, 129, 0.2); color: var(--accent-low); border: 1px solid var(--accent-low); }
+
+    .kanban-col { background: #0b0f19; padding: 18px; border-radius: 12px; border: 2px dashed var(--border-color); }
+    .kanban-col.drag-over { border-color: var(--primary); }
+
+    .theme-preset-btn { width: 36px; height: 36px; border-radius: 50%; border: 2px solid white; cursor: pointer; transition: transform 0.2s; }
+    .theme-preset-btn:hover { transform: scale(1.15); }
+
+    .color-picker-row { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--border-color); }
+
+    .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); justify-content: center; align-items: center; backdrop-filter: blur(5px); z-index: 100; }
+    .modal-overlay.active { display: flex; }
+    .modal { background: var(--panel-bg); padding: 28px; border-radius: 16px; width: 420px; border: 1px solid var(--border-color); }
+    .form-group { margin-bottom: 16px; display: flex; flex-direction: column; gap: 6px; }
+    .form-group label { font-size: 0.8rem; font-weight: 700; color: var(--text-muted); }
+    .form-group input, .form-group select { padding: 10px; border: 1px solid var(--border-color); border-radius: 8px; background: #0b0f19; color: white; outline: none; }
+  </style>
 </head>
 <body>
-    <div class="app-container">
-        <header class="app-header">
-            <h1>TaskFlow</h1>
-            <p class="subtitle">Cloud Cyber Security — Oral Presentation Demo</p>
-        </header>
 
-        <section class="task-form-card">
-            <h2>Add New Task</h2>
-            <form id="task-form">
-                <div class="form-group">
-                    <input type="text" id="task-title" placeholder="Task title..." required>
-                </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <select id="task-priority">
-                            <option value="low">Low Priority</option>
-                            <option value="medium" selected>Medium Priority</option>
-                            <option value="high">High Priority</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <input type="date" id="task-due-date">
-                    </div>
-                    <button type="submit" class="btn btn-primary">Add Task</button>
-                </div>
-            </form>
-        </section>
-
-        <section class="task-list-section">
-            <div class="list-header">
-                <h2>Your Tasks</h2>
-                <span id="task-count" class="badge">0 tasks</span>
-            </div>
-            <ul id="task-list" class="task-list"></ul>
-        </section>
+  <aside>
+    <div>
+      <div class="brand">⚡ TaskFlow Pro</div>
+      <div class="nav-list">
+        <div class="nav-item active" onclick="switchTab('dashboard', this)">📊 Executive Suite</div>
+        <div class="nav-item" onclick="switchTab('tasks', this)">✅ All Tasks</div>
+        <div class="nav-item" onclick="switchTab('kanban', this)">📋 Kanban Board</div>
+        <div class="nav-item" onclick="switchTab('calendar', this)">📅 Calendar</div>
+        <div class="nav-item" onclick="switchTab('analytics', this)">📈 Productivity Hub</div>
+        <div class="nav-item" onclick="switchTab('settings', this)">🎨 Themes & Settings</div>
+      </div>
     </div>
-    <script src="script.js"></script>
+    <div style="font-size: 0.75rem; color: var(--text-muted); text-align: center;">TaskFlow v3.0 • Custom Theme</div>
+  </aside>
+
+  <main>
+    <header>
+      <div>
+        <h1>Command Center 🚀</h1>
+        <p class="subtitle">Live metrics and task customization hub.</p>
+      </div>
+      <div style="display: flex; gap: 12px; align-items: center;">
+        <input type="text" class="search-bar" id="search-input" placeholder="🔍 Search tasks..." oninput="renderAll()">
+        <button class="btn-primary" onclick="toggleModal(true)">+ Add New Task</button>
+      </div>
+    </header>
+
+    <!-- DASHBOARD VIEW -->
+    <section id="view-dashboard" class="view-section active">
+      <div class="dashboard-grid">
+        <div class="clock-widget">
+          <div>
+            <div style="font-size: 0.85rem; font-weight: 700; opacity: 0.8; text-transform: uppercase;">Real-Time Productivity Monitor</div>
+            <div class="live-clock" id="live-clock">00:00:00 PM</div>
+          </div>
+          <div class="reminder-badge" id="live-reminder">⚡ 0 tasks pending attention</div>
+        </div>
+
+        <div class="stat-card" style="border-top: 4px solid var(--primary);">
+          <div class="stat-card-title">Total Workload</div>
+          <div class="stat-card-value" id="stat-total" style="color: var(--primary);">0</div>
+        </div>
+        <div class="stat-card" style="border-top: 4px solid var(--accent-high);">
+          <div class="stat-card-title">High Priority</div>
+          <div class="stat-card-value" id="stat-high" style="color: var(--accent-high);">0</div>
+        </div>
+        <div class="stat-card" style="border-top: 4px solid var(--accent-medium);">
+          <div class="stat-card-title">In Progress</div>
+          <div class="stat-card-value" id="stat-progress" style="color: var(--accent-medium);">0</div>
+        </div>
+        <div class="stat-card" style="border-top: 4px solid var(--accent-low);">
+          <div class="stat-card-title">Completed</div>
+          <div class="stat-card-value" id="stat-completed" style="color: var(--accent-low);">0</div>
+        </div>
+
+        <div class="widget-box" style="grid-column: span 7;">
+          <div class="widget-title">
+            <span>🎯 Immediate Focus</span>
+            <span style="font-size: 0.75rem; color: var(--primary); font-weight: 600;">High Priority First</span>
+          </div>
+          <ul class="task-list" id="dashboard-task-list"></ul>
+        </div>
+
+        <div class="widget-box" style="grid-column: span 5; display: flex; flex-direction: column; justify-content: space-between;">
+          <div>
+            <div class="widget-title">🔥 Daily Target Progress</div>
+            <div style="margin-top: 10px;">
+              <div style="display: flex; justify-content: space-between; font-size: 0.85rem; font-weight: 700; margin-bottom: 8px;">
+                <span>Completion Rate</span>
+                <span id="streak-rate" style="color: var(--accent-low);">0%</span>
+              </div>
+              <div style="width: 100%; background: #0b0f19; height: 12px; border-radius: 6px; overflow: hidden; border: 1px solid var(--border-color);">
+                <div id="streak-bar" style="height: 100%; background: linear-gradient(90deg, var(--accent-medium), var(--accent-low)); width: 0%; transition: width 0.4s;"></div>
+              </div>
+            </div>
+          </div>
+          <div style="background: rgba(255,255,255,0.05); border: 1px solid var(--border-color); padding: 16px; border-radius: 10px; margin-top: 20px;">
+            <div style="font-weight: 700; color: var(--primary); font-size: 0.9rem;">🎨 Custom Theme Mode</div>
+            <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 4px;">Head over to <b>Themes & Settings</b> in the left sidebar to change your color palette live!</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ALL TASKS -->
+    <section id="view-tasks" class="view-section">
+      <h2>All Managed Tasks</h2>
+      <ul class="task-list" id="all-task-list"></ul>
+    </section>
+
+    <!-- KANBAN BOARD -->
+    <section id="view-kanban" class="view-section">
+      <h2>Interactive Board</h2>
+      <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-top: 20px;">
+        <div class="kanban-col" ondragover="allowDrop(event)" ondragleave="clearDrag(event)" ondrop="dropTask(event, 'todo')">
+          <h3 style="font-size: 0.95rem; color: var(--primary); margin-bottom: 12px;">⏳ To Do</h3>
+          <ul class="task-list" id="kanban-todo"></ul>
+        </div>
+        <div class="kanban-col" ondragover="allowDrop(event)" ondragleave="clearDrag(event)" ondrop="dropTask(event, 'progress')">
+          <h3 style="font-size: 0.95rem; color: var(--accent-medium); margin-bottom: 12px;">🔄 In Progress</h3>
+          <ul class="task-list" id="kanban-progress"></ul>
+        </div>
+        <div class="kanban-col" ondragover="allowDrop(event)" ondragleave="clearDrag(event)" ondrop="dropTask(event, 'done')">
+          <h3 style="font-size: 0.95rem; color: var(--accent-low); margin-bottom: 12px;">✅ Completed</h3>
+          <ul class="task-list" id="kanban-done"></ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- CALENDAR -->
+    <section id="view-calendar" class="view-section">
+      <h2>Calendar View</h2>
+      <div style="background: var(--card-bg); border: 1px solid var(--border-color); padding: 20px; border-radius: 12px; margin-top: 16px;">
+        <div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px; text-align: center; font-weight: 700; color: var(--text-muted); margin-bottom: 12px;">
+          <div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div>
+        </div>
+        <div id="calendar-grid" style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px; text-align: center;"></div>
+      </div>
+    </section>
+
+    <!-- ANALYTICS -->
+    <section id="view-analytics" class="view-section">
+      <h2>Productivity Hub</h2>
+      <div style="background: var(--card-bg); border: 1px solid var(--border-color); padding: 24px; border-radius: 12px; margin-top: 20px;">
+        <h3>Overall Progress</h3>
+        <p id="analytics-text" style="color: var(--text-muted); margin-top: 8px;">0 of 0 tasks completed</p>
+      </div>
+    </section>
+
+    <!-- CUSTOM THEME & SETTINGS VIEW -->
+    <section id="view-settings" class="view-section">
+      <h2>🎨 Appearance & Color Customization</h2>
+      <p class="subtitle" style="margin-bottom: 24px;">Pick a preset theme or pick exact custom hex colors for your interface.</p>
+
+      <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px;">
+        <!-- Preset Palettes -->
+        <div class="widget-box">
+          <h3 style="margin-bottom: 14px;">Instant Preset Themes</h3>
+          <div style="display: flex; gap: 14px;">
+            <div class="theme-preset-btn" style="background: #6366f1;" title="Indigo Cyber" onclick="applyPreset('#0f172a', '#1e293b', '#6366f1')"></div>
+            <div class="theme-preset-btn" style="background: #ec4899;" title="Neon Pink" onclick="applyPreset('#18020c', '#2c0b1e', '#ec4899')"></div>
+            <div class="theme-preset-btn" style="background: #10b981;" title="Emerald Dark" onclick="applyPreset('#022c22', '#064e3b', '#10b981')"></div>
+            <div class="theme-preset-btn" style="background: #f59e0b;" title="Warm Amber" onclick="applyPreset('#1c1917', '#292524', '#f59e0b')"></div>
+            <div class="theme-preset-btn" style="background: #3b82f6;" title="Ocean Blue" onclick="applyPreset('#0f172a', '#1e3a8a', '#3b82f6')"></div>
+            <div class="theme-preset-btn" style="background: #8b5cf6;" title="Deep Purple" onclick="applyPreset('#120a2a', '#241442', '#8b5cf6')"></div>
+          </div>
+        </div>
+
+        <!-- Fine-Tuned Custom Color Pickers -->
+        <div class="widget-box">
+          <h3 style="margin-bottom: 10px;">Custom Color Pickers</h3>
+          <div class="color-picker-row">
+            <span>Primary Brand Color</span>
+            <input type="color" id="picker-primary" onchange="updateThemeFromPickers()">
+          </div>
+          <div class="color-picker-row">
+            <span>Main Background</span>
+            <input type="color" id="picker-bg" onchange="updateThemeFromPickers()">
+          </div>
+          <div class="color-picker-row">
+            <span>Cards & Panels</span>
+            <input type="color" id="picker-panel" onchange="updateThemeFromPickers()">
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top: 30px;">
+        <h2>Workspace Data Management</h2>
+        <div style="margin-top: 14px;">
+          <button class="btn-primary" onclick="exportData()">Export Data JSON</button>
+          <button class="btn-primary" style="background: #ef4444; margin-left: 10px;" onclick="clearData()">Clear All Data</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- MODAL -->
+  <div class="modal-overlay" id="task-modal">
+    <div class="modal">
+      <h3 style="margin-bottom: 18px;">Create Task</h3>
+      <form onsubmit="handleCreateTask(event)">
+        <div class="form-group">
+          <label>Task Title</label>
+          <input type="text" id="input-title" required placeholder="e.g. Prepare Client Pitch">
+        </div>
+        <div class="form-group">
+          <label>Category Tag</label>
+          <input type="text" id="input-category" placeholder="e.g. Work, Launch, Design">
+        </div>
+        <div class="form-group">
+          <label>Priority Level</label>
+          <select id="input-priority">
+            <option value="low">Low Priority</option>
+            <option value="medium" selected>Medium Priority</option>
+            <option value="high">High Priority</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Due Date</label>
+          <input type="date" id="input-date">
+        </div>
+        <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px;">
+          <button type="button" class="btn-primary" style="background: var(--text-muted);" onclick="toggleModal(false)">Cancel</button>
+          <button type="submit" class="btn-primary">Save Task</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    let tasks = JSON.parse(localStorage.getItem('taskflow_tasks')) || [];
+    let customTheme = JSON.parse(localStorage.getItem('taskflow_theme')) || {
+      bg: '#0f172a',
+      panel: '#1e293b',
+      primary: '#6366f1'
+    };
+
+    function applyTheme(theme) {
+      document.documentElement.style.setProperty('--bg-color', theme.bg);
+      document.documentElement.style.setProperty('--panel-bg', theme.panel);
+      document.documentElement.style.setProperty('--card-bg', theme.panel);
+      document.documentElement.style.setProperty('--primary', theme.primary);
+
+      document.getElementById('picker-bg').value = theme.bg;
+      document.getElementById('picker-panel').value = theme.panel;
+      document.getElementById('picker-primary').value = theme.primary;
+
+      localStorage.setItem('taskflow_theme', JSON.stringify(theme));
+    }
+
+    function applyPreset(bg, panel, primary) {
+      customTheme = { bg, panel, primary };
+      applyTheme(customTheme);
+    }
+
+    function updateThemeFromPickers() {
+      customTheme.bg = document.getElementById('picker-bg').value;
+      customTheme.panel = document.getElementById('picker-panel').value;
+      customTheme.primary = document.getElementById('picker-primary').value;
+      applyTheme(customTheme);
+    }
+
+    setInterval(() => {
+      const now = new Date();
+      document.getElementById('live-clock').textContent = now.toLocaleTimeString();
+    }, 1000);
+
+    function saveState() {
+      localStorage.setItem('taskflow_tasks', JSON.stringify(tasks));
+      renderAll();
+    }
+
+    function toggleModal(show) {
+      document.getElementById('task-modal').classList.toggle('active', show);
+    }
+
+    function handleCreateTask(e) {
+      e.preventDefault();
+      tasks.push({
+        id: Date.now(),
+        title: document.getElementById('input-title').value,
+        category: document.getElementById('input-category').value || 'General',
+        priority: document.getElementById('input-priority').value,
+        dueDate: document.getElementById('input-date').value || 'Today',
+        status: 'todo'
+      });
+      document.getElementById('input-title').value = '';
+      toggleModal(false);
+      saveState();
+    }
+
+    function deleteTask(id) {
+      tasks = tasks.filter(t => t.id !== id);
+      saveState();
+    }
+
+    function dragStart(e, id) { e.dataTransfer.setData('text/plain', id); }
+    function allowDrop(e) { e.preventDefault(); e.currentTarget.classList.add('drag-over'); }
+    function clearDrag(e) { e.currentTarget.classList.remove('drag-over'); }
+    function dropTask(e, targetStatus) {
+      e.preventDefault();
+      e.currentTarget.classList.remove('drag-over');
+      const id = Number(e.dataTransfer.getData('text/plain'));
+      tasks = tasks.map(t => t.id === id ? { ...t, status: targetStatus } : t);
+      saveState();
+    }
+
+    function switchTab(tabName, element) {
+      document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+      if (element) element.classList.add('active');
+      document.querySelectorAll('.view-section').forEach(sec => sec.classList.remove('active'));
+      const target = document.getElementById(`view-${tabName}`);
+      if (target) target.classList.add('active');
+    }
+
+    function createCardHtml(t) {
+      return `
+        <li class="task-item" draggable="true" ondragstart="dragStart(event, ${t.id})">
+          <div>
+            <div class="task-title" style="${t.status === 'done' ? 'text-decoration: line-through; opacity: 0.5;' : ''}">${t.title}</div>
+            <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 4px;">🏷️ ${t.category} • 📅 ${t.dueDate}</div>
+          </div>
+          <div style="display:flex; gap: 10px; align-items:center;">
+            <span class="badge badge-${t.priority}">${t.priority}</span>
+            <button onclick="deleteTask(${t.id})" style="border:none; background:none; cursor:pointer; color:var(--accent-high); font-weight:bold;">✕</button>
+          </div>
+        </li>
+      `;
+    }
+
+    function renderAll() {
+      const query = (document.getElementById('search-input')?.value || '').toLowerCase();
+      const filtered = tasks.filter(t => t.title.toLowerCase().includes(query) || t.category.toLowerCase().includes(query));
+
+      const total = tasks.length;
+      const completed = tasks.filter(t => t.status === 'done').length;
+      const progress = tasks.filter(t => t.status === 'progress').length;
+      const highPriority = tasks.filter(t => t.priority === 'high' && t.status !== 'done').length;
+      const rate = total === 0 ? 0 : Math.round((completed / total) * 100);
+
+      document.getElementById('stat-total').textContent = total;
+      document.getElementById('stat-high').textContent = highPriority;
+      document.getElementById('stat-progress').textContent = progress;
+      document.getElementById('stat-completed').textContent = completed;
+      document.getElementById('live-reminder').textContent = `⚡ ${tasks.filter(t => t.status !== 'done').length} tasks pending attention`;
+
+      document.getElementById('streak-rate').textContent = `${rate}%`;
+      document.getElementById('streak-bar').style.width = `${rate}%`;
+
+      const allCards = filtered.map(createCardHtml).join('');
+      document.getElementById('dashboard-task-list').innerHTML = allCards || '<p class="subtitle" style="margin-top: 12px;">No urgent tasks found.</p>';
+      document.getElementById('all-task-list').innerHTML = allCards || '<p class="subtitle" style="margin-top: 12px;">No tasks created.</p>';
+
+      document.getElementById('kanban-todo').innerHTML = filtered.filter(t => t.status === 'todo').map(createCardHtml).join('');
+      document.getElementById('kanban-progress').innerHTML = filtered.filter(t => t.status === 'progress').map(createCardHtml).join('');
+      document.getElementById('kanban-done').innerHTML = filtered.filter(t => t.status === 'done').map(createCardHtml).join('');
+
+      document.getElementById('analytics-text').textContent = `${completed} of ${total} tasks completed (${rate}%)`;
+
+      const calGrid = document.getElementById('calendar-grid');
+      if (calGrid) {
+        calGrid.innerHTML = '';
+        for (let i = 1; i <= 31; i++) {
+          calGrid.innerHTML += `<div style="padding: 12px; background: #0b0f19; border-radius: 8px; font-size: 0.85rem; border: 1px solid var(--border-color);">${i}</div>`;
+        }
+      }
+    }
+
+    function exportData() {
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(tasks, null, 2));
+      const downloadAnchor = document.createElement('a');
+      downloadAnchor.setAttribute("href", dataStr);
+      downloadAnchor.setAttribute("download", "taskflow_pro_export.json");
+      document.body.appendChild(downloadAnchor);
+      downloadAnchor.click();
+      downloadAnchor.remove();
+    }
+
+    function clearData() {
+      if (confirm('Clear all task data?')) {
+        tasks = [];
+        saveState();
+      }
+    }
+
+    applyTheme(customTheme);
+    renderAll();
+  </script>
 </body>
 </html>
