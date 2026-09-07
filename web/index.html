@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TaskFlow — Task Manager</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app-container">
+        <header class="app-header">
+            <h1>TaskFlow</h1>
+            <p class="subtitle">Cloud Cyber Security — Oral Presentation Demo</p>
+        </header>
+
+        <section class="task-form-card">
+            <h2>Add New Task</h2>
+            <form id="task-form">
+                <div class="form-group">
+                    <input type="text" id="task-title" placeholder="Task title..." required>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <select id="task-priority">
+                            <option value="low">Low Priority</option>
+                            <option value="medium" selected>Medium Priority</option>
+                            <option value="high">High Priority</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <input type="date" id="task-due-date">
+                    </div>
+                    <button type="submit" class="btn btn-primary">Add Task</button>
+                </div>
+            </form>
+        </section>
+
+        <section class="task-list-section">
+            <div class="list-header">
+                <h2>Your Tasks</h2>
+                <span id="task-count" class="badge">0 tasks</span>
+            </div>
+            <ul id="task-list" class="task-list"></ul>
+        </section>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
