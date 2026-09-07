@@ -36,3 +36,14 @@ def test_mark_completed_non_existent_id(tmp_path):
     storage = Storage(filepath=str(tmp_path / "tasks.json"))
     manager = TaskManager(storage=storage)
     assert manager.mark_completed(99) is False
+
+
+def test_clear_all_tasks(tmp_path):
+    """Verify clearing all tasks empties manager state and JSON storage."""
+    storage = Storage(filepath=str(tmp_path / "tasks.json"))
+    manager = TaskManager(storage=storage)
+    manager.add_task("Temporary Task")
+    assert len(manager.list_tasks()) == 1
+
+    manager.clear_all_tasks()
+    assert len(manager.list_tasks()) == 0

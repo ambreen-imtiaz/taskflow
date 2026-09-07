@@ -56,3 +56,8 @@ class TaskManager:
             if task.id == task_id:
                 return task
         return None
+
+    def clear_all_tasks(self) -> None:
+        """Utility method to clear all tasks from memory and storage."""
+        self.tasks.clear()
+        self.storage.save_tasks(self.tasks)
