@@ -57,4 +57,4 @@ If you would like to run this application on your own computer:
 
 1. **Clone the Repository:**
    ```bash
-   git clone [https://github.com/YOUR-USERNAME/YOUR-REPO-NAME.git](https://github.com/YOUR-USERNAME/YOUR-REPO-NAME.git)
+   git clone [https://github.com/ambreen-imtiaz/taskflow.git](https://github.com/ambreen-imtiaz/taskflow.git)
