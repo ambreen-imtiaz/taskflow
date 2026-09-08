@@ -29,9 +29,9 @@ A modern, fast, and highly customizable personal productivity dashboard designed
 
 ---
 
-## 🖥️ Setup Steps & Local Installation
+## 🖥️ Setup & How to Run the App Locally
 
-To clone and run this application on your local machine:
+To clone the repository and run the application locally on your machine:
 
 1. **Clone the Repository:**
    ```bash
